@@ -16,6 +16,15 @@ theorem TaylorApprox_Φm (fix : FixedPoint) {x Δ : ℝ}
     (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
     |Φm x - ΦTm_fix fix Δ x| < Em (-1) Δ + (2 + Δ) * fix.ε := Theorem53_ΦTm' fix hdn hx
 
+theorem TaylorApprox_Φp' (fix : FixedPoint) {x Δ : ℝ} (hd : 0 < Δ) (hx : x ≤ 0) :
+    |Φp x - ΦTp_fix fix Δ x| < (Real.log 2 / 8) * Δ ^ 2 + (2 + Δ) * fix.ε := by
+  linarith [Theorem53_ΦTp fix hd hx, Ep_bound hd]
+
+theorem TaylorApprox_Φm' (fix : FixedPoint) {x Δ : ℝ}
+    (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
+    |Φm x - ΦTm_fix fix Δ x| < Real.log 2 * Δ ^ 2 + (2 + Δ) * fix.ε := by
+  linarith [Theorem53_ΦTm' fix hdn hx, Em_bound (div_one_imp_pos hdn)]
+
 /- Error correction approximations -/
 
 theorem ErrorCorrection_Φp (fix : FixedPoint) (hc : c ≤ 0) (hΔ : ΔP < Δ)
@@ -60,6 +69,8 @@ theorem Cotransformation (fix : FixedPoint)
 
 #print axioms TaylorApprox_Φp
 #print axioms TaylorApprox_Φm
+#print axioms TaylorApprox_Φp'
+#print axioms TaylorApprox_Φm'
 #print axioms ErrorCorrection_Φp
 #print axioms ErrorCorrection_Φm
 #print axioms Cotrans_case2

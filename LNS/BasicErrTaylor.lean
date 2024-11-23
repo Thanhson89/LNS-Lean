@@ -84,11 +84,13 @@ lemma differentiable_Ep_r : Differentiable ℝ (Ep i) := by
 lemma continuous_Ep_r : Continuous (Ep i) := differentiable_Ep_r.continuous
 
 @[fun_prop]
+lemma differentiableAt_Em_r (hi : i < 0) (hr : 0 < r) : DifferentiableAt ℝ (Em i) r := by
+  unfold Em; rw [deriv_Φm hi]; fun_prop (disch := linarith)
+
+@[fun_prop]
 lemma differentiableOn_Em_r (hi : i < 0) : DifferentiableOn ℝ (Em i) (Set.Ioi 0) := by
-  unfold Em; rw [deriv_Φm hi]
-  have : ∀ x ∈ Set.Ioi 0, i - x < 0 := by
-    simp only [Set.mem_Ioi, sub_neg]; intro x hx; linarith
-  fun_prop (disch := assumption)
+  intro r hr
+  exact (differentiableAt_Em_r hi hr).differentiableWithinAt
 
 @[fun_prop]
 lemma continuousOn_Em_r (hi : i < 0) : ContinuousOn (Em i) (Set.Ici 0) := by
@@ -378,3 +380,57 @@ lemma Em_i_monotoneOn (hr : 0 ≤ r) : MonotoneOn (fun i => Em i r) (Set.Iio 0) 
   · simp only [interior_Iio]; exact differentiableOn_Em_i hr
   simp only [interior_Iio, Set.mem_Iio]
   exact fun i hi => deriv_Em_i_nonneg hi hr
+
+/- Simplified expressions for error bounds -/
+
+lemma Ep_bound (hd : 0 < Δ) : Ep 0 Δ < log 2 / 8 * Δ ^ 2 := by
+  set f := fun (x : ℝ) => log 2 / 8 * x ^ 2 - Ep 0 x
+  suffices h : f 0 < f Δ by simp_all [f, Ep_eq_zero]
+  apply strictMonoOn_of_deriv_pos (convex_Ici 0) (by fun_prop) _ (le_refl 0) (le_of_lt hd) hd
+  simp only [Set.nonempty_Iio, interior_Ici', Set.mem_Ioi]
+  intro x hx
+  rw [deriv_sub (by fun_prop) (by fun_prop), deriv_Ep_r]; simp; norm_num
+  set g := fun (x : ℝ) => log 2 / 8 * (2 * x) - (1 - 2 ^ (-x)) / (2 * (1 + 2 ^ (-x)))
+  suffices h : g 0 < g x by simp_all [g]
+  apply strictMonoOn_of_deriv_pos (convex_Ici 0) (by fun_prop (disch := simp)) _ (le_refl 0) (le_of_lt hx) hx
+  simp only [Set.nonempty_Iio, interior_Ici', Set.mem_Ioi]
+  intro x hx; clear * - hx
+  get_deriv (fun x ↦ log 2 / 8 * (2 * x) - (1 - 2 ^ (-x)) / (2 * (1 + 2 ^ (-x)))) at x; simp
+  simp at h; rw [h.deriv]; clear h g
+  field_simp; apply lt_of_sub_pos
+  set y := (2 : ℝ) ^ (-x)
+  ring_nf
+  rw [(by ring : log 2 * 8 - log 2 * y * 16 + log 2 * y ^ 2 * 8 = log 2 * 8 * (1 - y) ^ 2)]
+  refine mul_pos (by norm_num [log_pos]) (pow_pos ?_ 2)
+  simp [y]
+  apply rpow_lt_one_of_one_lt_of_neg one_lt_two (by linarith)
+
+lemma Em_bound (hd : 0 < Δ) : Em (-1) Δ < log 2 * Δ ^ 2 := by
+  set f := fun (x : ℝ) => log 2 * x ^ 2 - Em (-1) x
+  suffices h : f 0 < f Δ by simp_all [f, Em_eq_zero]
+  apply strictMonoOn_of_deriv_pos (convex_Ici 0) (by fun_prop (disch := norm_num)) _ (le_refl 0) (le_of_lt hd) hd
+  simp only [Set.nonempty_Iio, interior_Ici', Set.mem_Ioi]
+  intro x hx
+  rw [deriv_sub (by fun_prop) (by fun_prop (disch := simp_all)), deriv_Em_r (by norm_num) hx]; simp; norm_num
+  set g := fun (x : ℝ) => log 2 * (2 * x) - (1 / 2 - 2 ^ (-1 - x)) / (1 / 2 * (1 - 2 ^ (-1 - x)))
+  suffices h : g 0 < g x by unfold g at h; norm_num at h; exact h
+  have ineq : ∀ x : ℝ, 0 ≤ x → 1 - (2 : ℝ) ^ (-1 - x) ≠ 0 := by
+    intro x hx; apply one_minus_two_pow_ne_zero2; linarith
+  apply strictMonoOn_of_deriv_pos (convex_Ici 0) _ _ (le_refl 0) (le_of_lt hx) hx
+  · have ineq : ∀ x ∈ Set.Ici (0 : ℝ), 1 / 2 * (1 - (2 : ℝ) ^ (-1 - x)) ≠ 0 := by
+      simp; exact ineq
+    fun_prop (disch := first | assumption | simp)
+  simp only [Set.nonempty_Iio, interior_Ici', Set.mem_Ioi]
+  intro x hx; clear * - hx ineq
+  get_deriv (fun x ↦ log 2 * (2 * x) - (1 / 2 - 2 ^ (-1 - x)) / (1 / 2 * (1 - 2 ^ (-1 - x)))) at x; simp [ineq x (le_of_lt hx)]
+  simp [g] at *; rw [h.deriv]; clear h g
+  have ineq2 : 2 * (2 * 2) * (1 - (2 : ℝ) ^ (-1 - x)) ^ 2 ≠ 0 := by
+    norm_num; apply ineq; exact le_of_lt hx
+  field_simp; norm_num; apply lt_of_sub_pos
+  set y := (2 : ℝ) ^ (-1 - x)
+  ring_nf
+  rw [(by ring : log 2 * 16 - log 2 * y * 40 + log 2 * y ^ 2 * 16 = (log 2 * 8) * ((2 * y - 1) * (y - 2)))]
+  apply mul_pos (by norm_num [log_pos])
+  suffices y < 1 / 2 by exact mul_pos_of_neg_of_neg (by linarith) (by linarith)
+  simp [y]; rw [← rpow_neg_one 2]
+  exact rpow_lt_rpow_of_exponent_lt one_lt_two (by linarith)
