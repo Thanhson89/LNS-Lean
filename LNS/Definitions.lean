@@ -14,10 +14,12 @@ structure FixedPoint where
   rnd_1 : rnd 1 = 1
   rnd_0 : rnd 0 = 0
 
-lemma FixedPoint.hrnd_sym (fix : FixedPoint) : ∀ x : ℝ, |fix.rnd x - x| ≤ fix.ε := by
-  intro x; rw [abs_sub_comm]; exact fix.hrnd x
+/- Fixed-point arithmetic with directed rounding (down or up) -/
+structure FixedPointDir extends FixedPoint where
+  rnd_dir : (∀ x, rnd x ≤ x) ∨ (∀ x, x ≤ rnd x)
 
-lemma FixedPoint.eps_nonneg (fix : FixedPoint) : 0 ≤ fix.ε := le_trans (abs_nonneg _) (fix.hrnd 0)
+instance : Coe FixedPointDir FixedPoint where
+  coe := FixedPointDir.toFixedPoint
 
 /- FunApprox f s models an approximation of a function f on s -/
 structure FunApprox (f : ℝ → ℝ) (s : Set ℝ) where
@@ -27,10 +29,6 @@ structure FunApprox (f : ℝ → ℝ) (s : Set ℝ) where
 
 instance : CoeFun (FunApprox f s) (fun _ => ℝ → ℝ) where
   coe fapprox := fapprox.fe
-
-lemma FunApprox.err_sym (g : FunApprox f s) :
-    ∀ x ∈ s, |g x - f x| ≤ g.err := by
-  intro x xs; rw [abs_sub_comm]; exact g.herr x xs
 
 open Real
 
