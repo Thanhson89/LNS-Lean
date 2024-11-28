@@ -16,6 +16,13 @@ theorem TaylorApprox_Φm (fix : FixedPoint) {x Δ : ℝ}
     (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
     |Φm x - ΦTm_fix fix Δ x| < Em (-1) Δ + (2 + Δ) * fix.ε := Theorem53_ΦTm' fix hdn hx
 
+theorem TaylorApprox_Φp_dir (fix : FixedPointDir) {x Δ : ℝ} (hd : 0 < Δ) (hx : x ≤ 0) :
+    |Φp x - ΦTp_fix fix Δ x| < Ep 0 Δ + (1 + Δ) * fix.ε := Theorem53_ΦTp_dir fix hd hx
+
+theorem TaylorApprox_Φm_dir (fix : FixedPointDir) {x Δ : ℝ}
+    (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
+    |Φm x - ΦTm_fix fix Δ x| < Em (-1) Δ + (1 + Δ) * fix.ε := Theorem53_ΦTm_dir' fix hdn hx
+
 theorem TaylorApprox_Φp' (fix : FixedPoint) {x Δ : ℝ} (hd : 0 < Δ) (hx : x ≤ 0) :
     |Φp x - ΦTp_fix fix Δ x| < (Real.log 2 / 8) * Δ ^ 2 + (2 + Δ) * fix.ε := by
   linarith [Theorem53_ΦTp fix hd hx, Ep_bound hd]
@@ -24,6 +31,15 @@ theorem TaylorApprox_Φm' (fix : FixedPoint) {x Δ : ℝ}
     (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
     |Φm x - ΦTm_fix fix Δ x| < Real.log 2 * Δ ^ 2 + (2 + Δ) * fix.ε := by
   linarith [Theorem53_ΦTm' fix hdn hx, Em_bound (div_one_imp_pos hdn)]
+
+theorem TaylorApprox_Φp_dir' (fix : FixedPointDir) {x Δ : ℝ} (hd : 0 < Δ) (hx : x ≤ 0) :
+    |Φp x - ΦTp_fix fix Δ x| < (Real.log 2 / 8) * Δ ^ 2 + (1 + Δ) * fix.ε := by
+  linarith [Theorem53_ΦTp_dir fix hd hx, Ep_bound hd]
+
+theorem TaylorApprox_Φm_dir' (fix : FixedPointDir) {x Δ : ℝ}
+    (hdn : ∃ n : ℕ, 1 = n * Δ) (hx : x ≤ -1) :
+    |Φm x - ΦTm_fix fix Δ x| < Real.log 2 * Δ ^ 2 + (1 + Δ) * fix.ε := by
+  linarith [Theorem53_ΦTm_dir' fix hdn hx, Em_bound (div_one_imp_pos hdn)]
 
 /- Error correction approximations -/
 
@@ -65,14 +81,27 @@ theorem Cotransformation (fix : FixedPoint)
     |Φm x - Cotrans fix Φe Δa Δb x| ≤ 5 * fix.ε + 2 * Φe.err :=
   Theorem72 fix Φe ha hb hΔa hΔb
 
+theorem Cotransformation_dir (fix : FixedPointDir)
+    (Φe : FunApprox Φm (Set.Iic (-1)))
+    (ha : 0 < Δa) (hb : 0 < Δb)
+    (hΔa : 2 * fix.ε ≤ Δa)                /- Δa should be large enough -/
+    (hΔb : 4 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ 3 * fix.ε + 2 * Φe.err :=
+  Theorem72_dir fix Φe ha hb hΔa hΔb
+
 /- All theorems depend on standard axioms only: [propext, Classical.choice, Quot.sound]-/
 
 #print axioms TaylorApprox_Φp
 #print axioms TaylorApprox_Φm
+#print axioms TaylorApprox_Φp_dir
+#print axioms TaylorApprox_Φm_dir
 #print axioms TaylorApprox_Φp'
 #print axioms TaylorApprox_Φm'
+#print axioms TaylorApprox_Φp_dir'
+#print axioms TaylorApprox_Φm_dir'
 #print axioms ErrorCorrection_Φp
 #print axioms ErrorCorrection_Φm
 #print axioms Cotrans_case2
 #print axioms Cotrans_case3
 #print axioms Cotransformation
+#print axioms Cotransformation_dir

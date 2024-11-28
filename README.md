@@ -15,6 +15,7 @@ All proof files are located in the [LNS](LNS) directory.
 
 [`Tactic.lean`](LNS/Tactic.lean) A tactic for computing derivatives.  
 [`Common.lean`](LNS/Common.lean) Some general lemmas.  
+[`BasicRounding.lean`](LNS/BasicRounding.lean) Basic properties of fixed-point rounding and approximations of functions.  
 [`BasicIxRx.lean`](LNS/BasicIxRx.lean) Basic properties of index functions `Iₓ`, `Rₓ`, `ind` and `rem`.  
 [`BasicPhi.lean`](LNS/BasicPhi.lean) Basic properties of `Φ⁺` and `Φ⁻`.  
 
