@@ -78,7 +78,8 @@ theorem Cotransformation (fix : FixedPoint)
     (ha : 0 < Δa) (hb : 0 < Δb)
     (hΔa : 4 * fix.ε ≤ Δa)                /- Δa should be large enough -/
     (hΔb : 8 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
-    |Φm x - Cotrans fix Φe Δa Δb x| ≤ 5 * fix.ε + 2 * Φe.err :=
+    let Ek2 := 2 * fix.ε + Φm (-1 - 2 * fix.ε) - Φm (-1) + Φe.err
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ fix.ε + Φm (-1 - Ek2) - Φm (-1) + Φe.err :=
   Theorem72 fix Φe ha hb hΔa hΔb
 
 theorem Cotransformation_dir (fix : FixedPointDir)
@@ -86,8 +87,25 @@ theorem Cotransformation_dir (fix : FixedPointDir)
     (ha : 0 < Δa) (hb : 0 < Δb)
     (hΔa : 2 * fix.ε ≤ Δa)                /- Δa should be large enough -/
     (hΔb : 4 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
-    |Φm x - Cotrans fix Φe Δa Δb x| ≤ 3 * fix.ε + 2 * Φe.err :=
+    let Ek2 := fix.ε + Φm (-1 - fix.ε) - Φm (-1) + Φe.err
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ fix.ε + Φm (-1 - Ek2) - Φm (-1) + Φe.err :=
   Theorem72_dir fix Φe ha hb hΔa hΔb
+
+theorem Cotransformation' (fix : FixedPoint)
+    (Φe : FunApprox Φm (Set.Iic (-1)))
+    (ha : 0 < Δa) (hb : 0 < Δb)
+    (hΔa : 4 * fix.ε ≤ Δa)                /- Δa should be large enough -/
+    (hΔb : 8 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ 5 * fix.ε + 2 * Φe.err :=
+  Theorem72' fix Φe ha hb hΔa hΔb
+
+theorem Cotransformation_dir' (fix : FixedPointDir)
+    (Φe : FunApprox Φm (Set.Iic (-1)))
+    (ha : 0 < Δa) (hb : 0 < Δb)
+    (hΔa : 2 * fix.ε ≤ Δa)                /- Δa should be large enough -/
+    (hΔb : 4 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ 3 * fix.ε + 2 * Φe.err :=
+  Theorem72_dir' fix Φe ha hb hΔa hΔb
 
 /- All theorems depend on standard axioms only: [propext, Classical.choice, Quot.sound]-/
 
@@ -105,3 +123,5 @@ theorem Cotransformation_dir (fix : FixedPointDir)
 #print axioms Cotrans_case3
 #print axioms Cotransformation
 #print axioms Cotransformation_dir
+#print axioms Cotransformation'
+#print axioms Cotransformation_dir'

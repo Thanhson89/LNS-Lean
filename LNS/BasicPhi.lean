@@ -130,3 +130,5 @@ lemma Φm_strictAntiOn : StrictAntiOn Φm (Set.Iio 0) := by
   simp only [Set.mem_Iio] at ht
   apply div_neg_of_neg_of_pos; simp only [Left.neg_neg_iff, Nat.ofNat_pos, rpow_pos_of_pos]
   simp only [gt_iff_lt, sub_pos]; apply rpow_lt_one_of_one_lt_of_neg (by simp only [Nat.one_lt_ofNat]) (by linarith)
+
+lemma Φm_antitoneOn : AntitoneOn Φm (Set.Iio 0) := Φm_strictAntiOn.antitoneOn

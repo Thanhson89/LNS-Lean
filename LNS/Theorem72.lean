@@ -9,6 +9,10 @@ noncomputable section
 
 open Real
 
+private lemma phi_sub_phi_nonneg (hx : 0 ≤ x) : 0 ≤ Φm (-1 - x) - Φm (-1) := by
+  apply sub_nonneg_of_le
+  exact Φm_antitoneOn (by simp; linarith) (by simp) (by linarith)
+
 lemma phi_sub_phi_bound (he : 0 < e) : Φm (-1 - e) - Φm (-1) < e := by
   set f := fun x => x - Φm (-1 - x)
   suffices h : f 0 < f e by simp [f] at h; linarith
@@ -391,7 +395,72 @@ end Contrans3
 
 section Cotrans
 
+private lemma contrans2_bound_le_cotrans3_bound (he : 0 ≤ e) (herr : 0 ≤ err) :
+    let Ek2 := e + Φm (-1 - e) - Φm (-1) + err
+    eps + Φm (-1 - e) - Φm (-1) + err ≤ eps + Φm (-1 - Ek2) - Φm (-1) + err := by
+  apply add_le_add_right
+  apply add_le_add_right
+  apply add_le_add_left
+  apply Φm_antitoneOn
+  · simp; linarith [phi_sub_phi_nonneg he]
+  · simp; linarith
+  · linarith [phi_sub_phi_nonneg he]
+
 theorem Theorem72 (fix : FixedPoint)
+    (Φe : FunApprox Φm (Set.Iic (-1)))
+    (ha : 0 < Δa) (hb : 0 < Δb)
+    (hΔa : 4 * fix.ε ≤ Δa)                /- Δa should be large enough -/
+    (hΔb : 8 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
+    let Ek2 := 2 * fix.ε + Φm (-1 - 2 * fix.ε) - Φm (-1) + Φe.err
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ fix.ε + Φm (-1 - Ek2) - Φm (-1) + Φe.err := by
+  intro Ek2
+  have hε := fix.eps_nonneg
+  have herr : 0 ≤ Φe.err := by
+    apply le_trans (abs_nonneg _) (Φe.herr (-1) _)
+    simp only [Set.mem_Iic, le_refl]
+  have ek2_nonneg : 0 ≤ Ek2 := by
+    have := phi_sub_phi_nonneg (by linarith : 0 ≤ 2 * fix.ε)
+    unfold Ek2; rw [add_sub_assoc]
+    positivity
+  unfold Cotrans
+  split_ifs with hax hbx hrem
+  · linarith [fix.hrnd (Φm x), phi_sub_phi_nonneg ek2_nonneg]
+  · apply le_trans (Theorem72_case2 fix Φe ha hΔa (by linarith : x ≤ -Δa))
+    exact contrans2_bound_le_cotrans3_bound (by positivity) herr
+  · have ineq : 4 * fix.ε ≤ Δb := by linarith
+    apply le_trans (Theorem72_case2 fix Φe hb ineq (by linarith : x ≤ -Δb))
+    exact contrans2_bound_le_cotrans3_bound (by positivity) herr
+  · exact Theorem72_case3 fix Φe ha hb (by linarith) hΔa hΔb (by linarith)
+
+theorem Theorem72_dir (fix : FixedPointDir)
+    (Φe : FunApprox Φm (Set.Iic (-1)))
+    (ha : 0 < Δa) (hb : 0 < Δb)
+    (hΔa : 2 * fix.ε ≤ Δa)                /- Δa should be large enough -/
+    (hΔb : 4 * fix.ε + 2 * Φe.err ≤ Δb) : /- Δb should be large enough -/
+    let Ek2 := fix.ε + Φm (-1 - fix.ε) - Φm (-1) + Φe.err
+    |Φm x - Cotrans fix Φe Δa Δb x| ≤ fix.ε + Φm (-1 - Ek2) - Φm (-1) + Φe.err := by
+  intro Ek2
+  have hε := fix.eps_nonneg
+  have herr : 0 ≤ Φe.err := by
+    apply le_trans (abs_nonneg _) (Φe.herr (-1) _)
+    simp only [Set.mem_Iic, le_refl]
+  have ek2_nonneg : 0 ≤ Ek2 := by
+    have := phi_sub_phi_nonneg hε
+    unfold Ek2; rw [add_sub_assoc]
+    positivity
+  unfold Cotrans
+  split_ifs with hax hbx hrem
+  · linarith [fix.hrnd (Φm x), phi_sub_phi_nonneg ek2_nonneg]
+  · apply le_trans (Theorem72_case2_dir fix Φe ha hΔa (by linarith : x ≤ -Δa))
+    exact contrans2_bound_le_cotrans3_bound (by positivity) herr
+  · have ineq : 2 * fix.ε ≤ Δb := by linarith
+    apply le_trans (Theorem72_case2_dir fix Φe hb ineq (by linarith : x ≤ -Δb))
+    exact contrans2_bound_le_cotrans3_bound (by positivity) herr
+  · exact Theorem72_case3_dir fix Φe ha hb (by linarith) hΔa hΔb (by linarith)
+
+/- Simplified bounds -/
+
+theorem Theorem72' (fix : FixedPoint)
     (Φe : FunApprox Φm (Set.Iic (-1)))
     (ha : 0 < Δa) (hb : 0 < Δb)
     (hΔa : 4 * fix.ε ≤ Δa)                /- Δa should be large enough -/
@@ -410,7 +479,7 @@ theorem Theorem72 (fix : FixedPoint)
     linarith
   · apply Theorem72_case3' fix Φe ha hb (by linarith) hΔa hΔb (by linarith)
 
-theorem Theorem72_dir (fix : FixedPointDir)
+theorem Theorem72_dir' (fix : FixedPointDir)
     (Φe : FunApprox Φm (Set.Iic (-1)))
     (ha : 0 < Δa) (hb : 0 < Δb)
     (hΔa : 2 * fix.ε ≤ Δa)                /- Δa should be large enough -/
